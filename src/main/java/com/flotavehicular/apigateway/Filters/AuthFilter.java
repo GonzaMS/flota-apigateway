@@ -37,7 +37,7 @@ public class AuthFilter implements GatewayFilter {
         if (routeValidator.isSecured.test(exchange.getRequest())) {
             if (!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
                 log.warn("Authorization header is missing");
-                return this.onError(exchange, "No authorization header");
+                return this.onError(exchange, "No token provided");
             }
 
             final var tokenHeader = exchange

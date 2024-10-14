@@ -65,6 +65,32 @@ public class GatewayConfig {
                         .uri("lb://car-microservice"))
 
                 .route(route -> route
+                        .path("/api/v1/kilometers/**")
+                        .filters(filter -> {
+                                    filter.circuitBreaker(config -> config
+                                            .setName("gateway-cb")
+                                            .setFallbackUri("forward:/api/v1/fallback/kilometers")
+                                    );
+                                    filter.filter(this.authFilter);
+                                    return filter;
+                                }
+                        )
+                        .uri("lb://car-microservice"))
+
+                .route(route -> route
+                        .path("/api/v1/incidents/**")
+                        .filters(filter -> {
+                                    filter.circuitBreaker(config -> config
+                                            .setName("gateway-cb")
+                                            .setFallbackUri("forward:/api/v1/fallback/incidents")
+                                    );
+                                    filter.filter(this.authFilter);
+                                    return filter;
+                                }
+                        )
+                        .uri("lb://car-microservice"))
+
+                .route(route -> route
                         .path("/api/v1/roles/**")
                         .filters(filter -> {
                                     filter.circuitBreaker(config -> config
