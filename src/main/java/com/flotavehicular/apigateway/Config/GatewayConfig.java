@@ -90,6 +90,19 @@ public class GatewayConfig {
                         )
                         .uri("lb://car-microservice"))
 
+                .route(route -> route
+                        .path("/api/v1/car-reports/**")
+                        .filters(filter -> {
+                                    filter.circuitBreaker(config -> config
+                                            .setName("gateway-cb")
+                                            .setFallbackUri("forward:/api/v1/fallback/car-reports")
+                                    );
+                                    filter.filter(this.authFilter);
+                                    return filter;
+                                }
+                        )
+                        .uri("lb://car-microservice"))
+
 
                 .route(route -> route
                         .path("/api/v1/maintenances/**")
