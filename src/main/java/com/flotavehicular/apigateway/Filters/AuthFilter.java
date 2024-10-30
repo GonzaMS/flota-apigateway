@@ -1,5 +1,6 @@
 package com.flotavehicular.apigateway.Filters;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactorLoadBalancerExchangeFilterFunction;
@@ -13,6 +14,8 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -80,16 +83,26 @@ public class AuthFilter implements GatewayFilter {
         return chain.filter(exchange);
     }
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     private Mono<Void> onError(ServerWebExchange exchange, String err) {
-        final var response = exchange.getResponse();
+        var response = exchange.getResponse();
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
-
-        log.error("Authorization error: {}", err);
-
-        final var buffer = response.bufferFactory().wrap(err.getBytes());
-
         response.getHeaders().add(HttpHeaders.CONTENT_TYPE, "application/json");
 
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Unauthorized");
+        errorResponse.put("message", err);
+
+        byte[] bytes;
+        try {
+            bytes = objectMapper.writeValueAsBytes(errorResponse);
+        } catch (Exception e) {
+            log.error("Error serializing JSON response", e);
+            bytes = ("{\"error\": \"Unauthorized\", \"message\": \"" + err + "\"}").getBytes();
+        }
+
+        var buffer = response.bufferFactory().wrap(bytes);
         return response.writeWith(Mono.just(buffer));
     }
 }
