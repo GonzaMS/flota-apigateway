@@ -51,6 +51,7 @@ public class GatewayConfig {
     public RouteLocator routeLocatorSecurity(RouteLocatorBuilder builder) {
         return builder
                 .routes()
+
                 .route(route -> route
                         .path("/api/v1/cars/**")
                         .filters(filter -> {
@@ -129,6 +130,20 @@ public class GatewayConfig {
                                 }
                         )
                         .uri("lb://security-microservice"))
+
+                .route(route -> route
+                        .path("/api/v1/users/**")
+                        .filters(filter -> {
+                                    filter.circuitBreaker(config -> config
+                                            .setName("gateway-cb")
+                                            .setFallbackUri("forward:/api/v1/fallback/users")
+                                    );
+                                    filter.filter(this.authFilter);
+                                    return filter;
+                                }
+                        )
+                        .uri("lb://security-microservice"))
+
 
                 .route(route -> route
                         .path("/api/v1/auth/**")
