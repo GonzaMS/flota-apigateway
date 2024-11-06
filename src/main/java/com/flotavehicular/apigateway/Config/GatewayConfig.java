@@ -52,6 +52,7 @@ public class GatewayConfig {
         return builder
                 .routes()
 
+//                Car microservices
                 .route(route -> route
                         .path("/api/v1/cars/**")
                         .filters(filter -> {
@@ -131,6 +132,76 @@ public class GatewayConfig {
                         )
                         .uri("lb://security-microservice"))
 
+
+//                Driver microservice
+                .route(route -> route
+                        .path("/api/v1/drivers/**")
+                        .filters(filter -> {
+                                    filter.circuitBreaker(config -> config
+                                            .setName("gateway-cb")
+                                            .setFallbackUri("forward:/api/v1/fallback/drivers")
+                                    );
+                                    filter.filter(this.authFilter);
+                                    return filter;
+                                }
+                        )
+                        .uri("lb://driver-microservice"))
+
+                .route(route -> route
+                        .path("/api/v1/driving_incidents/**")
+                        .filters(filter -> {
+                                    filter.circuitBreaker(config -> config
+                                            .setName("gateway-cb")
+                                            .setFallbackUri("forward:/api/v1/fallback/incidents")
+                                    );
+                                    filter.filter(this.authFilter);
+                                    return filter;
+                                }
+                        )
+                        .uri("lb://driver-microservice"))
+
+                .route(route -> route
+                        .path("/api/v1/driving-history/**")
+                        .filters(filter -> {
+                                    filter.circuitBreaker(config -> config
+                                            .setName("gateway-cb")
+                                            .setFallbackUri("forward:/api/v1/fallback/driving-history")
+                                    );
+                                    filter.filter(this.authFilter);
+                                    return filter;
+                                }
+                        )
+                        .uri("lb://driver-microservice"))
+
+                .route(route -> route
+                        .path("/api/v1/performance-evaluations/**")
+                        .filters(filter -> {
+                                    filter.circuitBreaker(config -> config
+                                            .setName("gateway-cb")
+                                            .setFallbackUri("forward:/api/v1/fallback/performance-evaluations")
+                                    );
+                                    filter.filter(this.authFilter);
+                                    return filter;
+                                }
+                        )
+                        .uri("lb://driver-microservice"))
+
+                .route(route -> route
+                        .path("/api/v1/assigned-orders/**")
+                        .filters(filter -> {
+                                    filter.circuitBreaker(config -> config
+                                            .setName("gateway-cb")
+                                            .setFallbackUri("forward:/api/v1/fallback/assigned-orders")
+                                    );
+                                    filter.filter(this.authFilter);
+                                    return filter;
+                                }
+                        )
+                        .uri("lb://driver-microservice"))
+
+
+
+//               Security microservice
                 .route(route -> route
                         .path("/api/v1/users/**")
                         .filters(filter -> {
